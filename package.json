@@ -1,0 +1,43 @@
+{
+	"name": "setup-pesde",
+	"version": "0.1.0",
+	"description": "",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"prettier": "node --experimental-strip-types node_modules/prettier/bin/prettier.cjs",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "GPL-3.0-only",
+	"engines": {
+		"pnpm": "^10.13.1",
+		"node": "^24.10.0"
+	},
+	"dependencies": {
+		"@actions/core": "^1.11.1",
+		"@actions/exec": "^1.1.1",
+		"@actions/github": "^6.0.1",
+		"@actions/io": "^1.1.3",
+		"@actions/tool-cache": "^2.0.2",
+		"decompress": "npm:@xhmikosr/decompress@^10.2.0",
+		"decompress-tar": "npm:@xhmikosr/decompress-tar@^8.1.0",
+		"decompress-tarbz2": "npm:@xhmikosr/decompress-tarbz2@^8.1.0",
+		"decompress-targz": "npm:@xhmikosr/decompress-targz@^8.1.0",
+		"decompress-tarxz": "npm:@felipecrs/decompress-tarxz@^5.0.4",
+		"decompress-unzip": "npm:@xhmikosr/decompress-unzip@^7.1.0",
+		"@octokit/openapi-types": "^20.0.0",
+		"winston": "^3.18.3"
+	},
+	"devDependencies": {
+		"@octokit/types": "^15.0.1",
+		"@types/decompress": "^4.2.7",
+		"@types/node": "^24.9.1",
+		"eslint": "^9.38.0",
+		"eslint-plugin-prettier": "^5.5.4",
+		"prettier": "^3.6.2",
+		"tsup": "^8.5.0",
+		"typescript": "^5.9.3"
+	}
+}
