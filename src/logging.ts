@@ -1,4 +1,5 @@
 import pkg from "../package.json" with { type: "json" };
+import { SpinnerTransport } from "./spinner.js";
 
 import { isDebug as actionsDebug } from "@actions/core";
 import winston from "winston";
@@ -26,7 +27,7 @@ export default winston.createLogger({
 			: winston.format.combine(baseFormat, winston.format.cli()),
 
 	transports: [
-		new winston.transports.Console(),
+		new SpinnerTransport(),
 		new winston.transports.File({
 			filename: `${pkg.name}.log`,
 			format: winston.format.combine(baseFormat, winston.format.uncolorize()),

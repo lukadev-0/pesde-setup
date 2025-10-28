@@ -1,7 +1,13 @@
+import { tmpdir } from "node:os";
+import { mkdtemp, rm } from "node:fs/promises";
+import { basename, join } from "node:path";
+
+import pkg from "../package.json" with { type: "json" };
+import { downloadWithProgress } from "./download.js";
 import { client as gh } from "./github.js";
 import { PlatformDescriptor, ReleaseAssetDescriptor } from "./heuristics/descriptor.js";
 import log from "./logging.js";
-import _, { fallibleToNull, type ReleaseAsset } from "./util.js";
+import _, { decompressCommonFormats, fallibleToNull, humanReadableSize, type ReleaseAsset } from "./util.js";
 
 import type { Endpoints } from "@octokit/types";
 
@@ -20,18 +26,41 @@ export class ToolManager {
 		return this;
 	}
 
-	public async install() {
+	public async install(binaryName = this.githubRepo.repo): Promise<string | undefined> {
 		const logger = this.logger.child({ scope: "toolmanager.install" });
 
-		const asset = await this.findCompatibleAsset();
-		if (asset == null) {
+		const assetDescriptor = await this.findCompatibleAsset();
+		if (assetDescriptor == null) {
 			logger.error(
 				`No compatible artifact found for current system for ${this.githubRepo.owner}/${this.githubRepo.repo}`
 			);
 			throw new Error("No artifact found");
 		}
 
-		// todo: decompression and install process
+		const { size: assetSize, name: assetName } = assetDescriptor.asset;
+
+		logger.info(`Attempting to download '${assetName}' (${humanReadableSize(assetSize)})`);
+
+		const tempdir = await mkdtemp(join(tmpdir(), `${pkg.name}-`));
+		try {
+			const compressedArchive = join(tempdir, assetDescriptor.asset.name);
+
+			// download and decompress the file
+			await downloadWithProgress(assetDescriptor.asset.browser_download_url, compressedArchive, assetSize);
+			return await decompressCommonFormats(compressedArchive, import.meta.dirname, {
+				filter: (file) => basename(file.path) == binaryName,
+				strip: 5 // fixme: figure this value out
+			})
+				.then((files) =>
+					files.length == 0
+						? Promise.reject(`Could not find binary '${binaryName} in downloaded artifact'`)
+						: Promise.resolve(files)
+				)
+				.then(() => join(import.meta.dirname, binaryName))
+				.catch((err) => void logger.error(err));
+		} finally {
+			await rm(tempdir, { recursive: true });
+		}
 	}
 
 	public async findCompatibleAsset() {
