@@ -1,3 +1,5 @@
+import { appendFileSync, existsSync } from "node:fs";
+
 import pkg from "../package.json" with { type: "json" };
 import { SpinnerTransport } from "./spinner.js";
 
@@ -28,10 +30,21 @@ export default winston.createLogger({
 
 	transports: [
 		new SpinnerTransport(),
-		new winston.transports.File({
-			filename: `${pkg.name}.log`,
-			format: winston.format.combine(baseFormat, winston.format.uncolorize()),
-			level: "debug"
-		})
+		(() => {
+			// append a small "comment" to denote the timing of the logs
+			const logFile = `${pkg.name}.log`;
+			const lineStarter = existsSync(logFile) ? "\n" : ""; // add a newline for separating two sessions
+			const now = new Date();
+			appendFileSync(
+				logFile,
+				`${lineStarter}// ${pkg.name} started at ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}\n`
+			);
+
+			return new winston.transports.File({
+				filename: logFile,
+				format: winston.format.combine(baseFormat, winston.format.uncolorize()),
+				level: "debug"
+			});
+		})()
 	]
 });
