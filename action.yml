@@ -13,5 +13,5 @@ inputs:
     description: "A GitHub token, used to access the API and avoid ratelimits. Defaults to `github.token`"
     default: ${{ github.server_url == 'https://github.com' && github.token || '' }}
 runs:
-  using: "node16" # todo: consider bumping to a newer version?
+  using: "node20"
   main: "dist/index.js"
