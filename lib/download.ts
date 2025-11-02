@@ -21,7 +21,7 @@ export const DownloadProvider: Record<"Actions" | "TrackedDownload", Downloader>
 			const { downloadTool } = await import("@actions/tool-cache");
 			await downloadTool(url, dest);
 		} catch (err) {
-			throw new Error(`Download failed (outside actions environment?): {$err}`);
+			throw new Error(`Download failed: ${err} (perhaps, this isn't running within actions)`);
 		}
 	}
 };
