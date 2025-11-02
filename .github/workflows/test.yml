@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest # todo: use a matrix and test for all OS'
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Install pesde
         uses: ./
 
@@ -23,6 +26,9 @@ jobs:
     runs-on: ubuntu-latest # todo: use a matrix and test for all OS'
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Install pesde & Lune
         uses: ./
 
