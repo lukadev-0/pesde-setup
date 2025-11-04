@@ -4,6 +4,8 @@ on:
   pull_request:
   workflow_dispatch:
 
+# todo: test for various version inputs
+
 jobs:
   install:
     name: Install only pesde
@@ -29,6 +31,8 @@ jobs:
 
       - name: Install pesde & Lune
         uses: ./
+        with:
+          lune-version: latest
 
       - name: Test pesde installation
         run: |
