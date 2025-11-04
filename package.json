@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"prettier": "node --experimental-strip-types node_modules/prettier/bin/prettier.cjs",
-		"build": "tsup",
+		"build": "rollup -c rollup.config.ts",
 		"dev": "pnpm build && NODE_LOG=debug GITHUB_TOKEN=$(gh auth token) node dist/",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
@@ -32,16 +32,23 @@
 		"decompress-unzip": "npm:@xhmikosr/decompress-unzip@^7.1.0",
 		"is-interactive": "^2.0.0",
 		"ora": "^9.0.0",
+		"tslib": "^2.8.1",
 		"winston": "^3.18.3",
 		"winston-transport": "^4.9.0"
 	},
 	"devDependencies": {
 		"@octokit/types": "^15.0.1",
+		"@rollup/plugin-commonjs": "^29.0.0",
+		"@rollup/plugin-json": "^6.1.0",
+		"@rollup/plugin-node-resolve": "^16.0.3",
 		"@types/decompress": "^4.2.7",
 		"@types/node": "^24.9.1",
 		"eslint": "^9.38.0",
 		"eslint-plugin-prettier": "^5.5.4",
 		"prettier": "^3.6.2",
+		"rollup": "^4.52.5",
+		"rollup-plugin-esbuild": "^6.2.1",
+		"rollup-plugin-tsconfig-paths": "^1.5.2",
 		"tsup": "^8.5.0",
 		"typescript": "^5.9.3"
 	}
