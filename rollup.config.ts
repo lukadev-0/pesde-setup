@@ -8,7 +8,6 @@ import json from "@rollup/plugin-json";
 import esbuild from "rollup-plugin-esbuild";
 import tsConfigPaths from "rollup-plugin-tsconfig-paths";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
 	input: "src/index.ts",
 	output: {
