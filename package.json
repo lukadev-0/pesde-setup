@@ -37,6 +37,7 @@
 		"winston-transport": "^4.9.0"
 	},
 	"devDependencies": {
+		"@actions/cache": "^4.1.0",
 		"@octokit/types": "^15.0.1",
 		"@rollup/plugin-commonjs": "^29.0.0",
 		"@rollup/plugin-json": "^6.1.0",
