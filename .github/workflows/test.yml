@@ -18,7 +18,7 @@ jobs:
 
       - name: Test pesde installation
         run: |
-          pesde --verson
+          pesde --version
           pesde x pesde/hello
 
   install-with-lune:
@@ -34,7 +34,7 @@ jobs:
 
       - name: Test pesde installation
         run: |
-          pesde --verson
+          pesde --version
           pesde x pesde/hello
 
       - name: Test Lune installation
