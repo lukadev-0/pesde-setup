@@ -1,4 +1,10 @@
-node_modules/
+# typescript / javascript
 dist/
 !dist/**/*.js
+node_modules/
+
+# pesde packages
+**/*_packages/
+
+# miscellaneous
 *.log

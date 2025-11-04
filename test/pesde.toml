@@ -1,0 +1,12 @@
+name = "pesde/setup_test"
+version = "0.1.0"
+license = "MIT"
+
+[target]
+environment = "lune"
+
+[indices]
+default = "https://github.com/pesde-pkg/index"
+
+[dependencies]
+hello = { name = "pesde/hello", version = "^1.0.2" }
