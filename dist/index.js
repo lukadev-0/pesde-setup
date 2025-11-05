@@ -42055,23 +42055,21 @@ class ActionsTransport extends Transport {
   }
   log(info, callback) {
     setImmediate(() => this.emit("logged", info));
-    if (process.env.GITHUB_ACTIONS === "true") {
-      const level = info[Symbol.for("level")];
-      const message = stripScopeFromMessage(info.message);
-      switch (level) {
-        case "info":
-          coreExports.info(message);
-          break;
-        case "warn":
-          coreExports.warning(message);
-          break;
-        case "error":
-          coreExports.error(message);
-          break;
-        case "debug":
-          coreExports.debug(message);
-          break;
-      }
+    const level = info[Symbol.for("level")];
+    const message = stripScopeFromMessage(info.message);
+    switch (level) {
+      case "info":
+        coreExports.info(message);
+        break;
+      case "warn":
+        coreExports.warning(message);
+        break;
+      case "error":
+        coreExports.error(message);
+        break;
+      case "debug":
+        coreExports.debug(message);
+        break;
     }
     callback();
   }
@@ -42094,8 +42092,7 @@ var logging = winston.createLogger({
   level: isDebug() ? "debug" : "info",
   format: isDebug() && process.env.NODE_ENV === "production" ? winston.format.json() : winston.format.combine(baseFormat, winston.format.cli()),
   transports: [
-    new SpinnerTransport(),
-    new ActionsTransport(),
+    process.env.GITHUB_ACTIONS === "true" ? new ActionsTransport() : new SpinnerTransport(),
     (() => {
       const logFile = `${pkg.name}.log`;
       const lineStarter = existsSync(logFile) ? "\n" : "";
