@@ -42016,6 +42016,67 @@ function requireCore () {
 
 var coreExports = requireCore();
 
+function ansiRegex({onlyFirst = false} = {}) {
+	// Valid string terminator sequences are BEL, ESC\, and 0x9c
+	const ST = '(?:\\u0007|\\u001B\\u005C|\\u009C)';
+
+	// OSC sequences only: ESC ] ... ST (non-greedy until the first ST)
+	const osc = `(?:\\u001B\\][\\s\\S]*?${ST})`;
+
+	// CSI and related: ESC/C1, optional intermediates, optional params (supports ; and :) then final byte
+	const csi = '[\\u001B\\u009B][[\\]()#;?]*(?:\\d{1,4}(?:[;:]\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]';
+
+	const pattern = `${osc}|${csi}`;
+
+	return new RegExp(pattern, onlyFirst ? undefined : 'g');
+}
+
+const regex = ansiRegex();
+
+function stripAnsi(string) {
+	if (typeof string !== 'string') {
+		throw new TypeError(`Expected a \`string\`, got \`${typeof string}\``);
+	}
+
+	// Even though the regex is global, we don't need to reset the `.lastIndex`
+	// because unlike `.exec()` and `.test()`, `.replace()` does it automatically
+	// and doing it manually has a performance penalty.
+	return string.replace(regex, '');
+}
+
+function stripScopeFromMessage(str) {
+  const ansiRemoved = stripAnsi(str);
+  const parts = ansiRemoved.split(":");
+  return parts.slice(1).join(":").trimStart();
+}
+class ActionsTransport extends Transport {
+  constructor(opts) {
+    super(opts);
+  }
+  log(info, callback) {
+    setImmediate(() => this.emit("logged", info));
+    if (process.env.GITHUB_ACTIONS === "true") {
+      const level = info[Symbol.for("level")];
+      const message = stripScopeFromMessage(info.message);
+      switch (level) {
+        case "info":
+          coreExports.info(message);
+          break;
+        case "warn":
+          coreExports.warning(message);
+          break;
+        case "error":
+          coreExports.error(message);
+          break;
+        case "debug":
+          coreExports.debug(message);
+          break;
+      }
+    }
+    callback();
+  }
+}
+
 const isDebug = () => process.env.DEV_DEBUG || process.env.NODE_LOG === "debug" || coreExports.isDebug();
 const baseFormat = winston.format.combine(
   winston.format.simple(),
@@ -42034,6 +42095,7 @@ var logging = winston.createLogger({
   format: isDebug() && process.env.NODE_ENV === "production" ? winston.format.json() : winston.format.combine(baseFormat, winston.format.cli()),
   transports: [
     new SpinnerTransport(),
+    new ActionsTransport(),
     (() => {
       const logFile = `${pkg.name}.log`;
       const lineStarter = existsSync(logFile) ? "\n" : "";
@@ -42049,7 +42111,6 @@ var logging = winston.createLogger({
         level: "debug"
       });
     })()
-    // todo: transport for actions core
   ]
 });
 
@@ -114601,7 +114662,7 @@ async function setupTool(repo, version) {
   }
   coreExports.addPath(toolPath);
 }
-if (coreExports.getState("needsCache") === "true") {
+if (coreExports.getBooleanInput("cache") && coreExports.getState("needsCache") === "true") {
   await cacheExports.saveCache(PESDE_PACKAGE_DIRS, await cacheKey());
   coreExports.saveState("needsCache", false);
   exit(0);
@@ -114609,4 +114670,6 @@ if (coreExports.getState("needsCache") === "true") {
 const luneVersion = coreExports.getInput("lune-version");
 if (luneVersion !== "") await setupTool(tools.lune, luneVersion);
 await setupTool(tools.pesde, coreExports.getInput("version") || "latest");
-await cacheExports.restoreCache(PESDE_PACKAGE_DIRS, await cacheKey()).then((hit) => !hit ? coreExports.saveState("needsCache", true) : {});
+if (coreExports.getBooleanInput("cache")) {
+  await cacheExports.restoreCache(PESDE_PACKAGE_DIRS, await cacheKey()).then((hit) => !hit ? coreExports.saveState("needsCache", true) : {});
+}
