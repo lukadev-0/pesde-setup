@@ -23,9 +23,9 @@ Array.prototype.filterMap = function <T, U>(predicate: (item: T) => U | null | u
 	});
 };
 
-export function fallibleToNull<T>(fn: (...args: any[]) => T, ...args: any[]): T | null {
+export function fallibleToNull<T, Args extends unknown[]>(fn: (...args: Args) => T, ...args: Args): T | null {
 	try {
-		return fn(args);
+		return fn(...args);
 	} catch {
 		return null;
 	}

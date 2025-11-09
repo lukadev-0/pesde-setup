@@ -6,9 +6,10 @@ import { ToolManager } from "@/tool.js";
 import { humanReadableSize } from "@/util.js";
 
 // monitor peak heap usage for debugging
+let peakHeap = 0;
+let monitorInterval: NodeJS.Timeout;
 if (isDebug()) {
-	var peakHeap = 0;
-	var monitorInterval = setInterval(() => {
+	monitorInterval = setInterval(() => {
 		const { heapUsed } = process.memoryUsage();
 		if (heapUsed > peakHeap) peakHeap = heapUsed;
 	}, 500); // check every 500ms

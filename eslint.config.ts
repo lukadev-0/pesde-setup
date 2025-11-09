@@ -4,6 +4,7 @@ import ts from "typescript-eslint";
 import tsParser from "@typescript-eslint/parser";
 import globals from "globals";
 import importPlugin from "eslint-plugin-import";
+import { createTypeScriptImportResolver } from "eslint-import-resolver-typescript";
 import prettierRecommended from "eslint-plugin-prettier/recommended";
 
 export default defineConfig([
@@ -29,6 +30,15 @@ export default defineConfig([
 			parser: tsParser,
 			ecmaVersion: 2023,
 			sourceType: "module"
+		},
+
+		settings: {
+			"import/resolver": {
+				typescript: {
+					alwaysTryTypes: true,
+					project: "./tsconfig.json"
+				}
+			}
 		},
 
 		rules: {

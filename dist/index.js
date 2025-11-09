@@ -58964,7 +58964,7 @@ Array.prototype.filterMap = function(predicate) {
 };
 function fallibleToNull(fn, ...args) {
   try {
-    return fn(args);
+    return fn(...args);
   } catch {
     return null;
   }

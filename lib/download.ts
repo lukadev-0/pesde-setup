@@ -88,7 +88,7 @@ async function downloadWithProgress(url: string, dest: string, size?: number): P
 		}
 
 		ensureExists(path.dirname(dest));
-		const responseStream = Readable.fromWeb(response.body as any);
+		const responseStream = Readable.fromWeb(response.body);
 		const fileStream = fs.createWriteStream(dest);
 
 		let lastUpdate = Date.now();
