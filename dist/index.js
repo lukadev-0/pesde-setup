@@ -1,5 +1,7 @@
 import path, { join, basename as basename$1, dirname } from 'node:path';
 import require$$1$8, { tmpdir, homedir } from 'node:os';
+import process$1, { exit } from 'node:process';
+import require$$1$6, { stripVTControlCharacters, promisify, isDeepStrictEqual } from 'node:util';
 import { mkdir as mkdir$1, mkdtemp, rm, readFile as readFile$1 } from 'node:fs/promises';
 import fs$1, { existsSync, appendFileSync } from 'node:fs';
 import require$$0$4 from 'util';
@@ -21,7 +23,6 @@ import require$$0$b from 'assert';
 import require$$8 from 'querystring';
 import require$$14 from 'stream/web';
 import require$$0$e, { Readable } from 'node:stream';
-import require$$1$6, { stripVTControlCharacters, promisify } from 'node:util';
 import require$$0$d from 'node:events';
 import require$$0$f from 'worker_threads';
 import require$$2$3 from 'perf_hooks';
@@ -33,7 +34,6 @@ import require$$0$g from 'diagnostics_channel';
 import require$$2$4 from 'child_process';
 import require$$6 from 'timers';
 import require$$2$6, { Buffer as Buffer$1 } from 'node:buffer';
-import process$1, { exit } from 'node:process';
 import zlib from 'node:zlib';
 import require$$0$h from 'constants';
 import 'node:stream/promises';
@@ -114635,7 +114635,11 @@ async function setupTool(repo, version) {
   const logger = parentLogger.child({ scope: "actions.setupTool" });
   let toolPath = toolCacheExports.find(repo.repo, version);
   if (!toolPath) {
-    toolPath = await new ToolManager(repo.owner, repo.repo).version(version).install(DownloadProvider.Actions).then((result) => result.path ? Promise.resolve(result) : Promise.reject("Download failed.")).catch((err) => void logger.error(err)).then(
+    let versionOpt = version;
+    if (isDeepStrictEqual(repo, tools.pesde)) {
+      versionOpt = (version2) => version2.split("+")[0] === version2;
+    }
+    toolPath = await new ToolManager(repo.owner, repo.repo).version(versionOpt).install(DownloadProvider.Actions).then((result) => result.path ? Promise.resolve(result) : Promise.reject("Download failed.")).catch((err) => void logger.error(err)).then(
       (result) => result.path ? toolCacheExports.cacheDir(dirname(result.path), repo.repo, result.version) : logger.error("Install failed.")
     );
   }

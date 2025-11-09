@@ -1,5 +1,7 @@
 import { dirname, join } from "node:path";
 import { homedir } from "node:os";
+import { exit } from "node:process";
+import { isDeepStrictEqual } from "node:util";
 
 import { DownloadProvider } from "@/index.js";
 import logging from "@/logging/index.js";
@@ -9,7 +11,6 @@ import { cacheKey, PESDE_PACKAGE_DIRS } from "./cache.js";
 import { cacheDir, find } from "@actions/tool-cache";
 import * as core from "@actions/core";
 import * as cache from "@actions/cache";
-import { exit } from "node:process";
 
 export type Tool = "pesde" | "lune";
 export type Repo = { owner: string; repo: string };
@@ -28,8 +29,15 @@ async function setupTool(repo: Repo, version: string) {
 
 	let toolPath = find(repo.repo, version);
 	if (!toolPath) {
+		let versionOpt: string | ((version: string) => boolean) = version;
+		if (isDeepStrictEqual(repo, tools.pesde)) {
+			// pesde releases include build metadata for corresponding registry version
+			// so we only compare the version part
+			versionOpt = (version) => version.split("+")[0] === version;
+		}
+
 		toolPath = await new ToolManager(repo.owner, repo.repo)
-			.version(version)
+			.version(versionOpt)
 			.install(DownloadProvider.Actions)
 			.then((result) => (result.path ? Promise.resolve(result) : Promise.reject("Download failed.")))
 			.catch((err) => void logger.error(err) as never)
