@@ -12,4 +12,4 @@ eslint **/*.ts --cache
 
 # build outputs
 pnpm build
-git add -A
+git add dist/index.js -f
