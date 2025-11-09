@@ -39,3 +39,7 @@ format `pesde-{OS}-{ARCH}-{HASH}`.
 - `HASH` is obtained by calculating the hashes of the combined contents of `pesde.toml` and
   `pesde.lock`. If the lockfile is unavailable in the source, it is marked as missing with a
   `missing(pesde.lock)` string which is appended in place of its contents.
+
+## License
+
+This project is licensed under the [GPL-3.0](/LICENSE) license.
