@@ -114636,11 +114636,11 @@ async function setupTool(repo, version) {
   const logger = parentLogger.child({ scope: "actions.setupTool" });
   let toolPath = toolCacheExports.find(repo.repo, version);
   if (!toolPath) {
-    toolPath = await new ToolManager(repo.owner, repo.repo).version(version).install(DownloadProvider.Actions, join(PESDE_HOME, "bins")).then((optionalPath) => optionalPath ? Promise.resolve(optionalPath) : Promise.reject("Download failed.")).catch((err) => void logger.error(err)).then(
+    toolPath = await new ToolManager(repo.owner, repo.repo).version(version).install(DownloadProvider.Actions).then((optionalPath) => optionalPath ? Promise.resolve(optionalPath) : Promise.reject("Download failed.")).catch((err) => void logger.error(err)).then(
       (result) => result.path ? toolCacheExports.cacheDir(dirname(result.path), repo.repo, result.version) : logger.error("Install failed.")
     );
   }
-  coreExports.addPath(dirname(toolPath));
+  coreExports.addPath(toolPath);
 }
 const cacheLogger = parentLogger.child({ scope: "actions.cache" });
 if (coreExports.getState("post") === "true") {

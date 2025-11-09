@@ -30,7 +30,7 @@ async function setupTool(repo: Repo, version: string) {
 	if (!toolPath) {
 		toolPath = await new ToolManager(repo.owner, repo.repo)
 			.version(version)
-			.install(DownloadProvider.Actions, join(PESDE_HOME, "bins"))
+			.install(DownloadProvider.Actions)
 			.then((optionalPath) => (optionalPath ? Promise.resolve(optionalPath) : Promise.reject("Download failed.")))
 			.catch((err) => void logger.error(err) as never)
 			.then((result) =>
@@ -40,7 +40,7 @@ async function setupTool(repo: Repo, version: string) {
 			);
 	}
 
-	core.addPath(dirname(toolPath));
+	core.addPath(toolPath);
 }
 
 const cacheLogger = parentLogger.child({ scope: "actions.cache" });
