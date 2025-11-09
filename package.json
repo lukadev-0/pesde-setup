@@ -7,11 +7,14 @@
 	"main": "dist/index.js",
 	"type": "module",
 	"scripts": {
-		"prettier": "node --experimental-strip-types node_modules/prettier/bin/prettier.cjs",
-		"build": "rollup -c rollup.config.ts",
-		"dev": "pnpm build && NODE_LOG=debug GITHUB_TOKEN=$(gh auth token) node dist/",
+		"prepare": "node .husky/husky.ts",
 		"lint": "eslint **/*.ts --cache",
-		"prepare": "node .husky/husky.ts"
+		"prettier": "node --experimental-strip-types node_modules/prettier/bin/prettier.cjs",
+		"format:check": "pnpm prettier",
+		"format": "pnpm prettier --write .",
+		"typecheck": "tsc --noEmit",
+		"build": "rollup -c rollup.config.ts",
+		"dev": "pnpm build && NODE_LOG=debug GITHUB_TOKEN=$(gh auth token) node dist/"
 	},
 	"engines": {
 		"pnpm": "^10.13.1",
