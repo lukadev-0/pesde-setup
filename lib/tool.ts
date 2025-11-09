@@ -7,7 +7,13 @@ import type { Downloader } from "./download.js";
 import { client as gh } from "./github.js";
 import { PlatformDescriptor, ReleaseAssetDescriptor } from "./heuristics/descriptor.js";
 import log from "./logging/index.js";
-import _, { decompressCommonFormats, fallibleToNull, humanReadableSize, type ReleaseAsset } from "./util.js";
+import _, {
+	decompressCommonFormats,
+	ensureExists,
+	fallibleToNull,
+	humanReadableSize,
+	type ReleaseAsset
+} from "./util.js";
 
 import type { Endpoints } from "@octokit/types";
 
@@ -52,10 +58,12 @@ export class ToolManager {
 
 		const result: InstallResult = { version: this.versionOrPredicate as string };
 		const tempdir = await mkdtemp(join(tmpdir(), `${pkg.name}-`));
+		await ensureExists(installDir);
+
 		try {
 			const compressedArchive = join(tempdir, assetDescriptor.asset.name);
 
-			// download and decompress the file
+			// download and decompress the file(await import("@actions/tool-cache").
 			await download(assetDescriptor.asset.browser_download_url, compressedArchive, assetSize);
 			await decompressCommonFormats(compressedArchive, installDir, {
 				filter: (file) => basename(file.path) == binaryName,

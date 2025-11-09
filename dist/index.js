@@ -1,6 +1,6 @@
 import path, { join, basename as basename$1, dirname } from 'node:path';
 import require$$1$8, { tmpdir, homedir } from 'node:os';
-import { mkdtemp, rm, readFile as readFile$1 } from 'node:fs/promises';
+import { mkdir as mkdir$1, mkdtemp, rm, readFile as readFile$1 } from 'node:fs/promises';
 import fs$1, { existsSync, appendFileSync } from 'node:fs';
 import require$$0$4 from 'util';
 import require$$0$5 from 'stream';
@@ -58992,6 +58992,14 @@ function humanReadableSize(bytes, maxDecimals = 2) {
   }
   return `${parseFloat(size.toFixed(maxDecimals))} ${unit}`;
 }
+async function ensureExists(dir) {
+  try {
+    await mkdir$1(dir, { recursive: true });
+  } catch (err) {
+    console.error(`Failed to ensure directory existence: ${err}`);
+    throw err;
+  }
+}
 
 class ToolManager {
   // base arguments for any repo related operations
@@ -59018,6 +59026,7 @@ class ToolManager {
     logger.info(`Attempting to download '${assetName}' (${humanReadableSize(assetSize)})`);
     const result = { version: this.versionOrPredicate };
     const tempdir = await mkdtemp(join(tmpdir(), `${pkg.name}-`));
+    await ensureExists(installDir);
     try {
       const compressedArchive = join(tempdir, assetDescriptor.asset.name);
       await download(assetDescriptor.asset.browser_download_url, compressedArchive, assetSize);
@@ -114622,20 +114631,21 @@ const tools = {
 };
 const parentLogger = logging.child({ scope: "actions" });
 parentLogger.exitOnError = true;
+const PESDE_HOME = join(homedir(), ".pesde");
 async function setupTool(repo, version) {
   const logger = parentLogger.child({ scope: "actions.setupTool" });
   let toolPath = toolCacheExports.find(repo.repo, version);
   if (!toolPath) {
-    toolPath = await new ToolManager(repo.owner, repo.repo).version(version).install(DownloadProvider.Actions).then((optionalPath) => optionalPath ? Promise.resolve(optionalPath) : Promise.reject("Download failed.")).catch((err) => void logger.error(err)).then(
+    toolPath = await new ToolManager(repo.owner, repo.repo).version(version).install(DownloadProvider.Actions, join(PESDE_HOME, "bins")).then((optionalPath) => optionalPath ? Promise.resolve(optionalPath) : Promise.reject("Download failed.")).catch((err) => void logger.error(err)).then(
       (result) => result.path ? toolCacheExports.cacheDir(dirname(result.path), repo.repo, result.version) : logger.error("Install failed.")
     );
   }
-  coreExports.addPath(toolPath);
+  coreExports.addPath(dirname(toolPath));
 }
 const cacheLogger = parentLogger.child({ scope: "actions.cache" });
 if (coreExports.getState("post") === "true") {
   if (coreExports.getState("needsCache") === "true") {
-    const cacheId = await cacheExports.saveCache(PESDE_PACKAGE_DIRS, await cacheKey());
+    const cacheId = await cacheExports.saveCache([...PESDE_PACKAGE_DIRS, PESDE_HOME], await cacheKey());
     coreExports.saveState("needsCache", false);
     cacheLogger.info(`Successfully cached to ${cacheId}, exiting`);
   } else {

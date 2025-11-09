@@ -1,4 +1,5 @@
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
+import { homedir } from "node:os";
 
 import { DownloadProvider } from "@/index.js";
 import logging from "@/logging/index.js";
@@ -20,6 +21,8 @@ const tools: Record<Tool, Repo> = {
 const parentLogger = logging.child({ scope: "actions" });
 parentLogger.exitOnError = true;
 
+const PESDE_HOME = join(homedir(), ".pesde");
+
 async function setupTool(repo: Repo, version: string) {
 	const logger = parentLogger.child({ scope: "actions.setupTool" });
 
@@ -27,7 +30,7 @@ async function setupTool(repo: Repo, version: string) {
 	if (!toolPath) {
 		toolPath = await new ToolManager(repo.owner, repo.repo)
 			.version(version)
-			.install(DownloadProvider.Actions)
+			.install(DownloadProvider.Actions, join(PESDE_HOME, "bins"))
 			.then((optionalPath) => (optionalPath ? Promise.resolve(optionalPath) : Promise.reject("Download failed.")))
 			.catch((err) => void logger.error(err) as never)
 			.then((result) =>
@@ -37,7 +40,7 @@ async function setupTool(repo: Repo, version: string) {
 			);
 	}
 
-	core.addPath(toolPath);
+	core.addPath(dirname(toolPath));
 }
 
 const cacheLogger = parentLogger.child({ scope: "actions.cache" });
@@ -46,7 +49,7 @@ if (core.getState("post") === "true") {
 	// post-run invocation, just cache or exit
 
 	if (core.getState("needsCache") === "true") {
-		const cacheId = await cache.saveCache(PESDE_PACKAGE_DIRS, await cacheKey());
+		const cacheId = await cache.saveCache([...PESDE_PACKAGE_DIRS, PESDE_HOME], await cacheKey());
 		core.saveState("needsCache", false); // notify future runs caching isn't required
 
 		cacheLogger.info(`Successfully cached to ${cacheId}, exiting`);
