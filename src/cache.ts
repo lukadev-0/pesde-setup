@@ -1,13 +1,14 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { homedir } from "node:os";
 
 export const PESDE_PACKAGE_DIRS = [
 	join(process.env.GITHUB_WORKSPACE!, "luau_packages"),
 	join(process.env.GITHUB_WORKSPACE!, "lune_packages"),
 	join(process.env.GITHUB_WORKSPACE!, "roblox_packages"),
 	join(process.env.GITHUB_WORKSPACE!, "roblox_server_packages"),
-	join(process.env.HOME!, ".pesde")
+	join(homedir(), ".pesde")
 ];
 
 export async function cacheKey(): Promise<string> {

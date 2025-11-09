@@ -1,5 +1,5 @@
 import path, { join, basename as basename$1, dirname } from 'node:path';
-import require$$1$8, { tmpdir } from 'node:os';
+import require$$1$8, { tmpdir, homedir } from 'node:os';
 import { mkdtemp, rm, readFile as readFile$1 } from 'node:fs/promises';
 import fs$1, { existsSync, appendFileSync } from 'node:fs';
 import require$$0$4 from 'util';
@@ -59095,7 +59095,7 @@ const PESDE_PACKAGE_DIRS = [
   join(process.env.GITHUB_WORKSPACE, "lune_packages"),
   join(process.env.GITHUB_WORKSPACE, "roblox_packages"),
   join(process.env.GITHUB_WORKSPACE, "roblox_server_packages"),
-  join(process.env.HOME, ".pesde")
+  join(homedir(), ".pesde")
 ];
 async function cacheKey() {
   const hashFiles = async (...paths) => {
