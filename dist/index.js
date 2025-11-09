@@ -59116,7 +59116,7 @@ async function cacheKey() {
     }
     return hash.digest("hex");
   };
-  return `pesde-${process.platform}-${process.arch}-${await hashFiles("pesde.toml", "pesde.lock")}`;
+  return `pesde-${currentSystem$1()}-${currentSystem()}-${await hashFiles("pesde.toml", "pesde.lock")}`;
 }
 
 var toolCache$1 = {};

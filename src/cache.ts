@@ -2,6 +2,9 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import { currentSystem as currentOS } from "@/heuristics/os.js";
+import { currentSystem as currentArch } from "@/heuristics/arch.js";
+
 export const PESDE_PACKAGE_DIRS = [
 	join(process.env.GITHUB_WORKSPACE!, "luau_packages"),
 	join(process.env.GITHUB_WORKSPACE!, "lune_packages"),
@@ -25,5 +28,5 @@ export async function cacheKey(): Promise<string> {
 		return hash.digest("hex");
 	};
 
-	return `pesde-${process.platform}-${process.arch}-${await hashFiles("pesde.toml", "pesde.lock")}`;
+	return `pesde-${currentOS()}-${currentArch()}-${await hashFiles("pesde.toml", "pesde.lock")}`;
 }
