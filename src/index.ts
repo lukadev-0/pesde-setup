@@ -39,7 +39,7 @@ async function setupTool(repo: Repo, version: string) {
 		if (isDeepStrictEqual(repo, tools.pesde)) {
 			// pesde releases include build metadata for corresponding registry version
 			// so we only compare the version part
-			versionOpt = (version) => version.split("+")[0] === version;
+			versionOpt = (potential) => potential.split("+")[0] === version;
 		}
 
 		toolPath = await new ToolManager(repo.owner, repo.repo)
