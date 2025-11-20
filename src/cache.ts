@@ -15,15 +15,23 @@ export const PESDE_PACKAGE_DIRS = [
 export async function cacheKey(): Promise<string> {
 	const hashFiles = async (...paths: string[]) => {
 		const hash = createHash("sha256");
-		for (const path of paths) {
-			const file = await readFile(path)
-				.then((contents) => contents.toString())
-				.catch((err: NodeJS.ErrnoException) =>
-					err.code == "ENOENT" ? Promise.resolve(`missing(${err.path})`) : Promise.reject(err)
-				);
+		const contents = await Promise.all(
+			paths.map(async (path) => {
+				try {
+					const buf = await readFile(path);
+					return buf.toString();
+				} catch (err) {
+					const e = err as NodeJS.ErrnoException;
+					if (e.code === "ENOENT") {
+						return `missing(${e.path})`;
+					}
 
-			hash.update(file);
-		}
+					throw err;
+				}
+			})
+		);
+
+		for (const text of contents) hash.update(text);
 
 		return hash.digest("hex");
 	};

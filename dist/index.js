@@ -59108,12 +59108,21 @@ const PESDE_PACKAGE_DIRS = [
 async function cacheKey() {
   const hashFiles = async (...paths) => {
     const hash = createHash("sha256");
-    for (const path of paths) {
-      const file = await readFile$1(path).then((contents) => contents.toString()).catch(
-        (err) => err.code == "ENOENT" ? Promise.resolve(`missing(${err.path})`) : Promise.reject(err)
-      );
-      hash.update(file);
-    }
+    const contents = await Promise.all(
+      paths.map(async (path) => {
+        try {
+          const buf = await readFile$1(path);
+          return buf.toString();
+        } catch (err) {
+          const e = err;
+          if (e.code === "ENOENT") {
+            return `missing(${e.path})`;
+          }
+          throw err;
+        }
+      })
+    );
+    for (const text of contents) hash.update(text);
     return hash.digest("hex");
   };
   return `pesde-${currentSystem$1()}-${currentSystem().toUpperCase()}-${await hashFiles("pesde.toml", "pesde.lock")}`;
