@@ -11,6 +11,7 @@ import { cacheKey, PESDE_PACKAGE_DIRS } from "./cache.js";
 import { cacheDir, find } from "@actions/tool-cache";
 import * as core from "@actions/core";
 import * as cache from "@actions/cache";
+import { ensureExists } from "@/util.js";
 
 export type Tool = "pesde" | "lune";
 export type Repo = { owner: string; repo: string };
@@ -23,6 +24,8 @@ const parentLogger = logging.child({ scope: "actions" });
 parentLogger.exitOnError = true;
 
 const PESDE_HOME = core.getInput("home") || process.env.PESDE_HOME || join(homedir(), ".pesde");
+
+await ensureExists(PESDE_HOME);
 core.exportVariable("PESDE_HOME", PESDE_HOME);
 
 parentLogger.info(`Discovered pesde home directory: ${PESDE_HOME}`);

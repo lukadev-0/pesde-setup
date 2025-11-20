@@ -114640,6 +114640,7 @@ const tools = {
 const parentLogger = logging.child({ scope: "actions" });
 parentLogger.exitOnError = true;
 const PESDE_HOME = coreExports.getInput("home") || process.env.PESDE_HOME || join(homedir(), ".pesde");
+await ensureExists(PESDE_HOME);
 coreExports.exportVariable("PESDE_HOME", PESDE_HOME);
 parentLogger.info(`Discovered pesde home directory: ${PESDE_HOME}`);
 async function setupTool(repo, version) {
