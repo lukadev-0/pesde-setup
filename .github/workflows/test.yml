@@ -25,7 +25,9 @@ jobs:
           cache: ${{ matrix.cache }}
 
       - name: Test pesde installation
-        run: pesde --version
+        run: |
+          pesde --version
+          cd test && pesde install --locked
 
   install-with-lune:
     name: Install pesde with Lune
@@ -48,6 +50,7 @@ jobs:
         run: |
           pesde --version
           pesde x pesde/hello
+          cd test && pesde install --locked
 
       - name: Test Lune installation
         run: |
