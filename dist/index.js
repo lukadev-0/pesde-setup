@@ -114663,12 +114663,7 @@ const cacheLogger = parentLogger.child({ scope: "actions.cache" });
 if (coreExports.getState("post") === "true") {
   if (coreExports.getState("needsCache") === "true") {
     const toCache = [...PESDE_PACKAGE_DIRS, PESDE_HOME];
-    const canCache = toCache.some(
-      (path) => (
-        // check whether any of the directories to cache exist
-        access(path).then(() => true).catch(() => false)
-      )
-    );
+    const canCache = await Promise.any(toCache.map((p) => access(p))).then(() => true).catch(() => false);
     if (canCache) {
       const cacheId = await cacheExports.saveCache(toCache, await cacheKey());
       coreExports.saveState("needsCache", false);

@@ -71,12 +71,9 @@ if (core.getState("post") === "true") {
 
 	if (core.getState("needsCache") === "true") {
 		const toCache = [...PESDE_PACKAGE_DIRS, PESDE_HOME];
-		const canCache = toCache.some((path) =>
-			// check whether any of the directories to cache exist
-			access(path)
-				.then(() => true)
-				.catch(() => false)
-		);
+		const canCache = await Promise.any(toCache.map((p) => access(p)))
+			.then(() => true)
+			.catch(() => false); // check whether any of the directories to cache exist
 
 		if (canCache) {
 			const cacheId = await cache.saveCache(toCache, await cacheKey());
