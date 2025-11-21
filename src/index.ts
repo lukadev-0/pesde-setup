@@ -1,5 +1,4 @@
-import { dirname, join } from "node:path";
-import { homedir } from "node:os";
+import { dirname } from "node:path";
 import { chdir, exit } from "node:process";
 import { isDeepStrictEqual } from "node:util";
 import { access } from "node:fs/promises";
@@ -24,12 +23,26 @@ const tools: Record<Tool, Repo> = {
 const parentLogger = logging.child({ scope: "actions" });
 parentLogger.exitOnError = true;
 
-const PESDE_HOME = core.getInput("home") || process.env.PESDE_HOME || join(homedir(), ".pesde");
+const PESDE_HOME = expandRelativeToWorkspace(core.getInput("home") || process.env.PESDE_HOME || "~/.pesde");
 
 await ensureExists(PESDE_HOME);
 core.exportVariable("PESDE_HOME", PESDE_HOME);
 
 parentLogger.info(`Discovered pesde home directory: ${PESDE_HOME}`);
+
+function expandRelativeToWorkspace(path: string) {
+	const workspaceRoot = dirname(process.env.GITHUB_WORKSPACE!);
+
+	// Expand tilde
+	if (path === "~" || path.startsWith("~/")) {
+		path = path.replace(/^~(?=$|\/|\\)/, workspaceRoot);
+	}
+
+	// Expand $HOME and ${HOME}
+	path = path.replace(/\$HOME/g, path).replace(/\$\{HOME\}/g, path);
+
+	return path;
+}
 
 // change directory into the root specified
 chdir(core.getInput("cwd"));

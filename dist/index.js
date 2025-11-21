@@ -1,8 +1,8 @@
 import path, { join, basename as basename$1, dirname } from 'node:path';
-import require$$1$8, { tmpdir, homedir } from 'node:os';
 import process$1, { chdir, exit } from 'node:process';
 import require$$1$6, { stripVTControlCharacters, promisify, isDeepStrictEqual } from 'node:util';
 import { mkdir as mkdir$1, mkdtemp, rm, readFile as readFile$1, access } from 'node:fs/promises';
+import require$$1$8, { tmpdir } from 'node:os';
 import fs$1, { existsSync, appendFileSync } from 'node:fs';
 import require$$0$4 from 'util';
 import require$$0$5 from 'stream';
@@ -114634,10 +114634,18 @@ const tools = {
 };
 const parentLogger = logging.child({ scope: "actions" });
 parentLogger.exitOnError = true;
-const PESDE_HOME = coreExports.getInput("home") || process.env.PESDE_HOME || join(homedir(), ".pesde");
+const PESDE_HOME = expandRelativeToWorkspace(coreExports.getInput("home") || process.env.PESDE_HOME || "~/.pesde");
 await ensureExists(PESDE_HOME);
 coreExports.exportVariable("PESDE_HOME", PESDE_HOME);
 parentLogger.info(`Discovered pesde home directory: ${PESDE_HOME}`);
+function expandRelativeToWorkspace(path) {
+  const workspaceRoot = dirname(process.env.GITHUB_WORKSPACE);
+  if (path === "~" || path.startsWith("~/")) {
+    path = path.replace(/^~(?=$|\/|\\)/, workspaceRoot);
+  }
+  path = path.replace(/\$HOME/g, path).replace(/\$\{HOME\}/g, path);
+  return path;
+}
 chdir(coreExports.getInput("cwd"));
 async function setupTool(repo, version) {
   const logger = parentLogger.child({ scope: "actions.setupTool" });
