@@ -25,9 +25,6 @@ importers:
       "@actions/tool-cache":
         specifier: ^2.0.2
         version: 2.0.2
-      "@octokit/openapi-types":
-        specifier: ^20.0.0
-        version: 20.0.0
       decompress:
         specifier: npm:@xhmikosr/decompress@^10.2.0
         version: "@xhmikosr/decompress@10.2.0"
@@ -65,6 +62,9 @@ importers:
       "@eslint/js":
         specifier: ^9.39.1
         version: 9.39.1
+      "@octokit/openapi-types":
+        specifier: ^20.0.0
+        version: 20.0.0
       "@octokit/types":
         specifier: ^15.0.1
         version: 15.0.1
