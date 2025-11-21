@@ -59120,7 +59120,7 @@ async function cacheKey() {
     for (const text of contents) hash.update(text);
     return hash.digest("hex");
   };
-  return `pesde-${currentSystem$1()}-${currentSystem().toUpperCase()}-${await hashFiles("pesde.toml", "pesde.lock")}`;
+  return `pesde-${coreExports.getInput("version")}-${currentSystem$1()}-${currentSystem().toUpperCase()}-${await hashFiles("pesde.toml", "pesde.lock")}`;
 }
 
 var toolCache$1 = {};

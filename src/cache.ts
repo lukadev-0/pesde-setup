@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 
 import { currentSystem as currentOS } from "@/heuristics/os.js";
 import { currentSystem as currentArch } from "@/heuristics/arch.js";
+import { getInput } from "@actions/core";
 
 export const PESDE_PACKAGE_DIRS = ["luau_packages", "lune_packages", "roblox_packages", "roblox_server_packages"];
 
@@ -30,5 +31,6 @@ export async function cacheKey(): Promise<string> {
 		return hash.digest("hex");
 	};
 
-	return `pesde-${currentOS()}-${currentArch().toUpperCase()}-${await hashFiles("pesde.toml", "pesde.lock")}`;
+	// TODO: remove version from cachekey
+	return `pesde-${getInput("version")}-${currentOS()}-${currentArch().toUpperCase()}-${await hashFiles("pesde.toml", "pesde.lock")}`;
 }
