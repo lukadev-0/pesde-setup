@@ -1,4 +1,5 @@
-import { mkdir } from "node:fs/promises";
+import { readlink, symlink, copyFile, mkdir, readdir, stat, rm } from "node:fs/promises";
+import { join, resolve } from "node:path";
 
 import decompress from "decompress";
 import decompressTar from "decompress-tar";
@@ -91,6 +92,35 @@ export async function ensureExists(dir: string) {
 		console.error(`Failed to ensure directory existence: ${err}`);
 		throw err;
 	}
+}
+
+// Performs a cross-device move on Windows, only if required. No-op on any other platforms.
+export async function crossDeviceMoveDir(src: string, dest: string): Promise<void> {
+	const srcNormalized = resolve(src);
+	const destNormalized = resolve(dest);
+
+	// skip if not on windows or source and destination are the same
+	if (process.platform !== "win32" || srcNormalized === destNormalized) return;
+
+	const srcStat = await stat(srcNormalized);
+	if (!srcStat.isDirectory()) throw new Error(`Source is not a directory: ${src}`);
+
+	await ensureExists(destNormalized);
+
+	await Promise.all(
+		(await readdir(srcNormalized, { withFileTypes: true })).map((entry) => {
+			const srcPath = join(srcNormalized, entry.name);
+			const destPath = join(destNormalized, entry.name);
+
+			if (entry.isDirectory()) return crossDeviceMoveDir(srcPath, destPath);
+			if (entry.isFile()) return copyFile(srcPath, destPath);
+			if (entry.isSymbolicLink()) {
+				return readlink(srcPath).then((target) => symlink(target, destPath));
+			}
+		})
+	);
+
+	await rm(srcNormalized, { recursive: true });
 }
 
 export default {};

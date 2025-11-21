@@ -1,7 +1,7 @@
 import { dirname, join } from "node:path";
 import { chdir, env, exit } from "node:process";
 import { isDeepStrictEqual } from "node:util";
-import { access, rename } from "node:fs/promises";
+import { access } from "node:fs/promises";
 import { homedir } from "node:os";
 
 import { DownloadProvider } from "@/index.js";
@@ -13,6 +13,7 @@ import { cacheDir, find } from "@actions/tool-cache";
 import * as core from "@actions/core";
 import * as cache from "@actions/cache";
 import { rmRF } from "@actions/io";
+import { crossDeviceMoveDir } from "@/util.js";
 
 export type Tool = "pesde" | "lune";
 export type Repo = { owner: string; repo: string };
@@ -89,7 +90,7 @@ if (core.getState("post") === "true") {
 	// post-run invocation, just cache or exit
 
 	if (core.getState("needsCache") === "true") {
-		await rename(PESDE_HOME, pesdeHome); // both paths are same everywhere except on windows
+		await crossDeviceMoveDir(PESDE_HOME, pesdeHome); // both paths are same everywhere except on windows
 
 		const cacheableDirs = await Promise.all(
 			// filter out dirs which do not exist and cannot be cached
@@ -135,7 +136,7 @@ if (core.getBooleanInput("cache")) {
 		}
 
 		// move the temporary pesde home onto the expected path (windows only)
-		await rename(pesdeHome, PESDE_HOME);
+		await crossDeviceMoveDir(pesdeHome, PESDE_HOME);
 
 		cacheLogger.info(`Restored cache key ${hit} successfully`);
 	});
