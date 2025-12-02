@@ -107,13 +107,18 @@ export async function crossDeviceMoveDir(src: string, dest: string): Promise<voi
 
 	await ensureExists(destNormalized);
 
+	console.log(`copying dir ${srcNormalized} to ${destNormalized}`)
+
 	await Promise.all(
 		(await readdir(srcNormalized, { withFileTypes: true })).map((entry) => {
 			const srcPath = join(srcNormalized, entry.name);
 			const destPath = join(destNormalized, entry.name);
 
 			if (entry.isDirectory()) return crossDeviceMoveDir(srcPath, destPath);
-			if (entry.isFile()) return copyFile(srcPath, destPath);
+			if (entry.isFile()) {
+				console.log(`copying file ${srcPath} to ${destPath}`)
+				return copyFile(srcPath, destPath)
+			};
 			if (entry.isSymbolicLink()) {
 				return readlink(srcPath).then((target) => symlink(target, destPath));
 			}
