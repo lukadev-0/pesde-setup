@@ -29,6 +29,7 @@ jobs:
         run: |
           pesde --version
           pesde install --locked
+          ls ~/.pesde
         working-directory: test
 
   install-with-lune:
